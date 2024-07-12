@@ -1,0 +1,57 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(rattle)
+library(ggplot2)
+```
+```{r}
+data(wine)
+```
+```{r}
+ui <- fluidPage(
+    titlePanel("Wine Dataset Visualization"),
+    sidebarLayout(
+        sidebarPanel(
+            selectInput("var", "Select a variable for histogram:", 
+                        choices = colnames(wine)[-1], selected = "Alcohol"),
+            selectInput("xvar", "Select X variable for scatter plot:", 
+                        choices = colnames(wine)[-1], selected = "Alcohol"),
+            selectInput("yvar", "Select Y variable for scatter plot:", 
+                        choices = colnames(wine)[-1], selected = "Malic_Acid")
+        ),
+        mainPanel(
+            tabsetPanel(
+                tabPanel("Histogram", plotOutput("histPlot")),
+                tabPanel("Scatter Plot", plotOutput("scatterPlot"))
+            )
+        )
+    )
+)
+```
+```{r}
+server <- function(input, output) {
+    
+    output$histPlot <- renderPlot({
+        ggplot(wine, aes_string(x = input$var)) + 
+            geom_histogram(binwidth = 1, fill = "blue", color = "white") + 
+            labs(x = input$var, y = "Frequency") +
+            theme_minimal()
+    })
+    
+    output$scatterPlot <- renderPlot({
+        ggplot(wine, aes_string(x = input$xvar, y = input$yvar)) + 
+            geom_point(color = "blue") + 
+            labs(x = input$xvar, y = input$yvar) +
+            theme_minimal()
+    })
+}
+
+```
+
+```{r}
+shinyApp(ui = ui, server = server)
+```
+
